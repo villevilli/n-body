@@ -17,7 +17,7 @@ jobs:
     - name: Build wasm
       id: build
       run: |
-        cargo install wasm-bindgen
+        cargo install wasm-bindgen-cli
         cargo build --target wasm32-unknown-unknown --profile wasm-release --verbose
         wasm-bindgen --out-name wasm_n_body_platformer --out-dir web/ --target web target/wasm32-unknown-unknown/wasm-release/n-body-platformer.wasm
     - name: Upload wasm as artifact
