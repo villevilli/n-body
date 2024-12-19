@@ -1,7 +1,7 @@
 #![allow(unused)]
 use bevy::{color::palettes::css::RED, ecs::query, prelude::*};
 
-const GRAVITATIONAL_CONSTANT: f32 = 60.674;
+const GRAVITATIONAL_CONSTANT: f32 = 674.0;
 
 #[derive(Component, Clone, Copy)]
 pub(crate) struct PhysicsTransform {
@@ -102,5 +102,5 @@ pub(crate) fn move_physics_entities_visual(mut query: Query<(&mut Transform, &Ph
 }
 
 fn calculate_gravity_force(mass1: f32, mass2: f32, distance: f32) -> f32 {
-    GRAVITATIONAL_CONSTANT * ((mass1 * mass2) / distance)
+    GRAVITATIONAL_CONSTANT * ((mass1 * mass2) / distance.powi(2))
 }

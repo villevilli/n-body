@@ -43,7 +43,7 @@ fn setup(
             location: Vec2::new(500.0, 20.0),
         },
         PhysicsVelocity {
-            velocity: (vec2(0.0, 80.0)),
+            velocity: (vec2(0.0, 20.0)),
             acceleration: vec2(0.0, 0.0),
         },
         Mesh2d(meshes.add(Circle::new(10.0))),
@@ -51,12 +51,12 @@ fn setup(
     ));
 
     commands.spawn((
-        PhysicsMaterial { mass: 0.4 },
+        PhysicsMaterial { mass: 16.0 },
         PhysicsTransform {
-            location: Vec2::new(510.0, 20.0),
+            location: Vec2::new(-310.0, 20.0),
         },
         PhysicsVelocity {
-            velocity: (vec2(0.0, 85.0)),
+            velocity: (vec2(0.0, 25.0)),
             acceleration: vec2(0.0, 0.0),
         },
         Mesh2d(meshes.add(Circle::new(2.0))),
