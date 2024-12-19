@@ -16,7 +16,8 @@ pub struct NBodyPlatformer;
 impl Plugin for NBodyPlatformer {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
-        app.add_systems(Update, (move_physics_entities_visual, handle_physics));
+        app.add_systems(Update, move_physics_entities_visual);
+        app.add_systems(FixedUpdate, handle_physics);
     }
 }
 
