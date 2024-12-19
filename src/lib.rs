@@ -1,3 +1,4 @@
+pub mod mouse_camera_control;
 pub mod physics;
 pub mod world_constructor;
 
@@ -13,11 +14,45 @@ use physics::{
 
 pub struct NBodyPlatformer;
 
+#[allow(dead_code)]
+#[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
+pub(crate) enum SimulationState {
+    Paused,
+    Playing,
+    Editing,
+}
+
 impl Plugin for NBodyPlatformer {
     fn build(&self, app: &mut App) {
+        app.insert_state(SimulationState::Paused);
         app.add_systems(Startup, setup);
-        app.add_systems(Update, move_physics_entities_visual);
-        app.add_systems(FixedUpdate, handle_physics);
+        app.add_systems(
+            Update,
+            (move_physics_entities_visual, handle_keyboard_input),
+        );
+
+        app.add_systems(
+            FixedUpdate,
+            handle_physics.run_if(in_state(SimulationState::Playing)),
+        );
+    }
+}
+
+fn handle_keyboard_input(
+    keys: Res<ButtonInput<KeyCode>>,
+    sim_state: Res<State<SimulationState>>,
+    mut next_sim_state: ResMut<NextState<SimulationState>>,
+) {
+    if keys.just_pressed(KeyCode::Space) {
+        use SimulationState::*;
+
+        next_sim_state.set(match sim_state.get() {
+            Paused => Playing,
+            Playing => Paused,
+            Editing => Editing,
+        });
+
+        println!("Next sim state: {:?}", next_sim_state)
     }
 }
 
@@ -26,7 +61,6 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    commands.spawn(Camera2d);
     commands.spawn((
         PhysicsMaterial { mass: 24000.0 },
         PhysicsTransform {
