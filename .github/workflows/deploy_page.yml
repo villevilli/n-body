@@ -17,6 +17,7 @@ jobs:
     - name: Build wasm
       id: build
       run: |
+        rustup target install wasm32-unknown-unknown
         cargo install wasm-bindgen-cli
         cargo build --target wasm32-unknown-unknown --profile wasm-release --verbose
         wasm-bindgen --out-name wasm_n_body_platformer --out-dir web/ --target web target/wasm32-unknown-unknown/wasm-release/n-body-platformer.wasm
