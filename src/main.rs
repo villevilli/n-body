@@ -1,3 +1,8 @@
+use bevy::prelude::*;
+use n_body_platformer::NBodyPlatformer;
+
 fn main() {
-    println!("Hello, world!");
+    App::new()
+        .add_plugins((DefaultPlugins, NBodyPlatformer))
+        .run();
 }
