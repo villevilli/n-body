@@ -1,19 +1,25 @@
 use bevy::{
-    input::mouse::{AccumulatedMouseScroll, MouseMotion},
+    input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll},
     prelude::*,
+    window::PrimaryWindow,
 };
 
-const SENSITIVITY: f32 = 3.0;
-
-pub struct MouseCameraControl;
+const SENSITIVITY: f32 = 0.10;
 
 #[derive(Component)]
 struct MainCameraMarker;
 
-impl Plugin for MouseCameraControl {
+pub struct MouseCameraControl<S: States> {
+    pub state: S,
+}
+
+impl<S: States> Plugin for MouseCameraControl<S> {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
-        app.add_systems(Update, handle_mouse_input);
+        app.add_systems(
+            Update,
+            camera_mouse_control.run_if(in_state(self.state.clone())),
+        );
     }
 }
 
@@ -21,19 +27,42 @@ fn setup(mut commands: Commands) {
     commands.spawn((Camera2d, MainCameraMarker));
 }
 
-fn handle_mouse_input(
+fn camera_mouse_control(
     mouse_buttons: Res<ButtonInput<MouseButton>>,
-    mut evr_motion: EventReader<MouseMotion>,
+    mouse_motion: Res<AccumulatedMouseMotion>,
     mouse_scroll: Res<AccumulatedMouseScroll>,
-    mut camera_query: Query<(&mut Camera2d, &mut Transform), With<MainCameraMarker>>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    mut camera_query: Query<(&mut OrthographicProjection, &mut Transform), With<MainCameraMarker>>,
 ) {
     //It's okay to panic if there are two main cameras
-    let (camera, mut transform) = camera_query.single_mut();
+    let (mut projection, mut transform) = camera_query.single_mut();
+
+    //It's also okay to panic with two primary windows
+    let window = window_query.single();
 
     if mouse_buttons.pressed(MouseButton::Right) {
-        if let Some(motion) = evr_motion.read().next() {
-            transform.translation.x -= motion.delta.x * SENSITIVITY;
-            transform.translation.y += motion.delta.y * SENSITIVITY;
-        }
+        let mut translation = mouse_motion.delta.extend(0.0);
+
+        //Since we want to "Drag" the screen we must negate the x
+        translation.x *= -1.0;
+        transform.translation += translation * projection.scale;
+    }
+
+    if mouse_scroll.delta.y != 0.0 {
+        let window_middle: Vec2 = window.physical_size().as_vec2() * 0.5;
+        let zoom_amount = projection.scale * mouse_scroll.delta.y * SENSITIVITY;
+
+        //We translate the camera so it zooms with the mouse in the middle
+        let mut camera_translation = window
+            .cursor_position()
+            .map_or(window_middle, |v| v - window_middle);
+
+        //We have to negate the y so that the zoom is towards the right position
+        camera_translation.y *= -1.0;
+
+        println!("Mouse Positino: {}", camera_translation);
+
+        transform.translation += camera_translation.extend(0.0) * zoom_amount;
+        projection.scale -= zoom_amount;
     }
 }
