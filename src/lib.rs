@@ -6,12 +6,10 @@ use bevy::{
     color::palettes::css::{BLUE, GREEN, WHITE},
     math::vec2,
     prelude::*,
+    ui::update,
 };
 use mouse_camera_control::MouseCameraControl;
-use physics::{
-    handle_physics, move_physics_entities_visual, PhysicsMaterial, PhysicsTransform,
-    PhysicsVelocity,
-};
+use physics::{PhysicsMaterial, PhysicsPlugin, PhysicsTransform, PhysicsVelocity};
 
 pub struct NBodyPlatformer;
 
@@ -26,19 +24,15 @@ pub(crate) enum SimulationState {
 impl Plugin for NBodyPlatformer {
     fn build(&self, app: &mut App) {
         app.insert_state(SimulationState::Paused);
-        app.add_plugins(MouseCameraControl {
-            state: SimulationState::Editing,
-        });
+        app.add_plugins((
+            MouseCameraControl::always_on(),
+            PhysicsPlugin {
+                running_state: SimulationState::Playing,
+            },
+        ));
         app.add_systems(Startup, setup);
-        app.add_systems(
-            Update,
-            (move_physics_entities_visual, keyboard_state_changer),
-        );
         app.add_systems(StateTransition, print_state_on_change::<SimulationState>);
-        app.add_systems(
-            FixedUpdate,
-            handle_physics.run_if(in_state(SimulationState::Playing)),
-        );
+        app.add_systems(Update, keyboard_state_changer);
     }
 }
 

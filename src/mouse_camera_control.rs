@@ -1,3 +1,5 @@
+use std::ops::Not;
+
 use bevy::{
     input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll},
     prelude::*,
@@ -9,16 +11,32 @@ const SENSITIVITY: f32 = 0.10;
 #[derive(Component)]
 struct MainCameraMarker;
 
+#[derive(States, Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub struct AlwaysRunning;
+
+#[derive(Default)]
 pub struct MouseCameraControl<S: States> {
-    pub state: S,
+    pub running_state: S,
 }
 
-impl<S: States> Plugin for MouseCameraControl<S> {
+impl MouseCameraControl<AlwaysRunning> {
+    pub const fn always_on() -> MouseCameraControl<AlwaysRunning> {
+        MouseCameraControl {
+            running_state: AlwaysRunning,
+        }
+    }
+}
+
+impl<S> Plugin for MouseCameraControl<S>
+where
+    S: States,
+{
     fn build(&self, app: &mut App) {
+        app.insert_state(AlwaysRunning);
         app.add_systems(Startup, setup);
         app.add_systems(
             Update,
-            camera_mouse_control.run_if(in_state(self.state.clone())),
+            camera_mouse_control.run_if(in_state(self.running_state.clone())),
         );
     }
 }

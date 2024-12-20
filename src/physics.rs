@@ -1,10 +1,23 @@
-#![allow(unused)]
-use bevy::{color::palettes::css::RED, ecs::query, prelude::*};
+use bevy::{color::palettes::css::RED, prelude::*};
 
 const GRAVITATIONAL_CONSTANT: f32 = 674.0;
 
+pub struct PhysicsPlugin<S: States> {
+    pub running_state: S,
+}
+
+impl<S: States> Plugin for PhysicsPlugin<S> {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            FixedUpdate,
+            calculate_physics.run_if(in_state(self.running_state.clone())),
+        );
+        app.add_systems(Update, move_physics_entities_visual);
+    }
+}
+
 #[derive(Component, Clone, Copy)]
-pub(crate) struct PhysicsTransform {
+pub struct PhysicsTransform {
     pub(crate) location: Vec2,
 }
 
@@ -15,36 +28,31 @@ impl PhysicsTransform {
 }
 
 #[derive(Component, Clone, Copy)]
-pub(crate) struct PhysicsMaterial {
-    pub(crate) mass: f32,
+pub struct PhysicsMaterial {
+    pub mass: f32,
 }
 
 #[derive(Component, Clone, Copy, Default)]
-pub(crate) struct PhysicsVelocity {
+pub struct PhysicsVelocity {
     pub(crate) velocity: Vec2,
     pub(crate) acceleration: Vec2,
 }
 
-struct CircleRender {
-    size: f32,
-    color: Color,
-}
-
 impl PhysicsVelocity {
-    pub fn add_acceleration_from_force(&mut self, mass: f32, force: Vec2, delta: f32) {
+    fn add_acceleration_from_force(&mut self, mass: f32, force: Vec2, delta: f32) {
         self.acceleration += force * mass.powi(-1) * delta
     }
 
-    pub fn reset_acceleration(&mut self) {
+    fn reset_acceleration(&mut self) {
         self.acceleration = Vec2::ZERO;
     }
 
-    pub fn apply_acceleration(&mut self, delta: f32) {
+    fn apply_acceleration(&mut self, delta: f32) {
         self.velocity += self.acceleration * delta
     }
 }
 
-pub(crate) fn handle_physics(
+fn calculate_physics(
     time: Res<Time>,
     mut gizmos: Gizmos,
     mut query: Query<(
@@ -76,7 +84,7 @@ pub(crate) fn handle_physics(
     }
 
     //Calculate acceleration from force for entities
-    query.iter_mut().for_each(|(_, t, mut v)| {
+    query.iter_mut().for_each(|(_, t, v)| {
         if let Some(mut v) = v {
             v.apply_acceleration(delta);
             gizmos.arrow_2d(t.location, t.location + v.acceleration, RED);
@@ -94,7 +102,7 @@ pub(crate) fn handle_physics(
     });
 }
 
-pub(crate) fn move_physics_entities_visual(mut query: Query<(&mut Transform, &PhysicsTransform)>) {
+fn move_physics_entities_visual(mut query: Query<(&mut Transform, &PhysicsTransform)>) {
     for (mut transform, physics_transform) in &mut query {
         transform.translation.x = physics_transform.location.x;
         transform.translation.y = physics_transform.location.y;
