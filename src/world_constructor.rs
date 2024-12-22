@@ -1,6 +1,5 @@
 use crate::physics::{PhysicsMaterial, PhysicsTransform, PhysicsVelocity};
 use bevy::prelude::*;
-use ops::FloatPow;
 use std::f32::consts::PI;
 
 const PLANET_DENSITY: f32 = 1.0;
@@ -36,8 +35,6 @@ enum SomePlanet {
 ///If not filled radius is derived from mass
 ///
 ///If given a none velocity the planet will be static
-///
-///If colour is none it will be picked at random
 ///
 #[derive(Default, Clone)]
 pub struct PlanetBuilder {

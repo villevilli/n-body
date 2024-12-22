@@ -1,4 +1,4 @@
-use bevy::{color::palettes::css::RED, prelude::*};
+use bevy::{color::palettes::css::LIGHT_BLUE, prelude::*};
 
 const GRAVITATIONAL_CONSTANT: f32 = 6740.0;
 
@@ -94,7 +94,7 @@ fn calculate_physics(
     query.iter_mut().for_each(|(_, t, v)| {
         if let Some(mut v) = v {
             v.apply_acceleration(delta);
-            gizmos.arrow_2d(t.location, t.location + v.acceleration, RED);
+            gizmos.arrow_2d(t.location, t.location + v.acceleration, LIGHT_BLUE);
 
             //Resets acceleration so we dont accumulate more next frame
             v.reset_acceleration();

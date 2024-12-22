@@ -9,7 +9,7 @@ enum SimulationState {
     Paused,
 }
 
-#[derive(States, Debug, PartialEq, Eq, Clone, Hash)]
+#[derive(States, Debug, PartialEq, Eq, Clone, Hash, Default)]
 struct AlwaysOn;
 
 fn main() {
@@ -18,6 +18,7 @@ fn main() {
         .add_plugins((
             MouseCameraControl {
                 running_state: AlwaysOn,
+                ..Default::default()
             },
             PhysicsPlugin {
                 running_state: SimulationState::Paused,
