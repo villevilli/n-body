@@ -1,5 +1,3 @@
-#![feature(never_type)]
-
 use bevy::color::palettes::css::*;
 use bevy::{math::vec2, prelude::*};
 use n_body_platformer::print_state_on_change;

@@ -1,8 +1,9 @@
 use crate::physics::{PhysicsMaterial, PhysicsTransform, PhysicsVelocity};
 use bevy::prelude::*;
+use ops::FloatPow;
 use std::f32::consts::PI;
 
-const PLANET_DENSITY: f32 = 5550000.0;
+const PLANET_DENSITY: f32 = 1.0;
 
 #[derive(Bundle, Clone)]
 struct DynamicPlanet {
@@ -37,6 +38,7 @@ enum SomePlanet {
 ///If given a none velocity the planet will be static
 ///
 ///If colour is none it will be picked at random
+///
 #[derive(Default, Clone)]
 pub struct PlanetBuilder {
     pub mass: f32,
@@ -47,7 +49,15 @@ pub struct PlanetBuilder {
 }
 
 impl PlanetBuilder {
+    /// ## Panics
+    /// Panics if attempted to build when mass or radius are negative
     fn build(self) -> SomePlanet {
+        assert!(!self.mass.is_sign_negative());
+
+        if let Some(r) = self.radius {
+            assert!(!r.is_sign_negative())
+        }
+
         let physics_material = PhysicsMaterial { mass: self.mass };
         let transform = PhysicsTransform {
             location: self.position,
@@ -56,7 +66,7 @@ impl PlanetBuilder {
         let style = PlanetStyle {
             radius: self
                 .radius
-                .unwrap_or_else(move || (self.mass.powi(2) * PI) / PLANET_DENSITY),
+                .unwrap_or_else(move || (self.mass.sqrt() / PI.sqrt()) / PLANET_DENSITY),
             color: self.color,
         };
 

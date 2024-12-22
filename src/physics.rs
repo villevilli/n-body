@@ -1,6 +1,6 @@
 use bevy::{color::palettes::css::RED, prelude::*};
 
-const GRAVITATIONAL_CONSTANT: f32 = 674.0;
+const GRAVITATIONAL_CONSTANT: f32 = 6740.0;
 
 pub struct PhysicsPlugin<S: States> {
     pub running_state: S,
