@@ -34,11 +34,18 @@ pub struct PhysicsMaterial {
 
 #[derive(Component, Clone, Copy, Default)]
 pub struct PhysicsVelocity {
-    pub(crate) velocity: Vec2,
-    pub(crate) acceleration: Vec2,
+    velocity: Vec2,
+    acceleration: Vec2,
 }
 
 impl PhysicsVelocity {
+    pub fn new(velocity: Vec2) -> Self {
+        Self {
+            velocity,
+            ..Default::default()
+        }
+    }
+
     fn add_acceleration_from_force(&mut self, mass: f32, force: Vec2, delta: f32) {
         self.acceleration += force * mass.powi(-1) * delta
     }
