@@ -1,5 +1,3 @@
-use std::ops::Not;
-
 use bevy::{
     input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll},
     prelude::*,
@@ -11,20 +9,8 @@ const SENSITIVITY: f32 = 0.10;
 #[derive(Component)]
 struct MainCameraMarker;
 
-#[derive(States, Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub struct AlwaysRunning;
-
-#[derive(Default)]
 pub struct MouseCameraControl<S: States> {
     pub running_state: S,
-}
-
-impl MouseCameraControl<AlwaysRunning> {
-    pub const fn always_on() -> MouseCameraControl<AlwaysRunning> {
-        MouseCameraControl {
-            running_state: AlwaysRunning,
-        }
-    }
 }
 
 impl<S> Plugin for MouseCameraControl<S>
@@ -32,7 +18,6 @@ where
     S: States,
 {
     fn build(&self, app: &mut App) {
-        app.insert_state(AlwaysRunning);
         app.add_systems(Startup, setup);
         app.add_systems(
             Update,
@@ -77,9 +62,6 @@ fn camera_mouse_control(
 
         //We have to negate the y so that the zoom is towards the right position
         camera_translation.y *= -1.0;
-
-        println!("Mouse Positino: {}", camera_translation);
-
         transform.translation += camera_translation.extend(0.0) * zoom_amount;
         projection.scale -= zoom_amount;
     }
