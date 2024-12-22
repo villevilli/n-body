@@ -49,8 +49,8 @@ fn main() {
             ..Default::default()
         });
 
-    App::new()
-        .add_plugins(DefaultPlugins)
+    let mut app = App::new();
+    app.add_plugins(DefaultPlugins)
         .add_plugins((
             MouseCameraControl {
                 running_state: AlwaysOn,
@@ -64,16 +64,22 @@ fn main() {
             },
             LevelBuilderPlugin(level),
         ))
-        .insert_state(AlwaysOn)
-        .insert_state(SimulationState::Paused)
-        .add_systems(
-            Update,
-            (
-                keyboard_state_changer,
-                print_state_on_change::<SimulationState>,
-            ),
-        )
-        .run();
+        .insert_state(AlwaysOn);
+
+    #[cfg(not(target_family = "wasm"))]
+    app.insert_state(SimulationState::Paused);
+
+    #[cfg(target_family = "wasm")]
+    app.insert_state(SimulationState::Running);
+
+    app.add_systems(
+        Update,
+        (
+            keyboard_state_changer,
+            print_state_on_change::<SimulationState>,
+        ),
+    )
+    .run();
 }
 
 fn keyboard_state_changer(
