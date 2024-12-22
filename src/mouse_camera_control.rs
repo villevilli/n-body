@@ -1,5 +1,5 @@
 use bevy::{
-    input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll},
+    input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll, MouseScrollUnit},
     prelude::*,
     window::PrimaryWindow,
 };
@@ -89,8 +89,17 @@ fn camera_mouse_control(
     }
 
     if mouse_scroll.delta.y != 0.0 {
+        info!(
+            "Mouse Scrolled: {} Units: {:?}",
+            &mouse_scroll.delta, &mouse_scroll.unit
+        );
+
         let window_middle: Vec2 = window.physical_size().as_vec2() * 0.5;
-        let zoom_amount = projection.scale * mouse_scroll.delta.y * SENSITIVITY;
+        let mut zoom_amount = projection.scale * mouse_scroll.delta.y * SENSITIVITY;
+
+        if mouse_scroll.unit == MouseScrollUnit::Pixel {
+            zoom_amount /= 100.0
+        }
 
         //We translate the camera so it zooms with the mouse in the middle
         let mut camera_translation = window
