@@ -1,3 +1,5 @@
+pub mod command_parser;
+
 use bevy::{
     color::palettes::css::WHITE,
     input::{
@@ -6,6 +8,7 @@ use bevy::{
     },
     prelude::*,
 };
+use command_parser::DevCommandList;
 
 const CMDLINE_FONT_SIZE: f32 = 16.0;
 const CMDLINE_FONT: &str = "fonts/FiraMono-Regular.ttf";
@@ -22,9 +25,9 @@ struct DevCommandlineTextMarker;
 #[derive(Component)]
 struct DevCommandlineMarker;
 
-pub struct DevCommandline;
+pub struct DevCommandlinePlugin;
 
-impl Plugin for DevCommandline {
+impl Plugin for DevCommandlinePlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.insert_state(CmdlineState::Closed);
         app.add_systems(
@@ -98,6 +101,8 @@ fn exit_cmdline(
 fn update_cmdline(
     mut ev_kb_input: EventReader<KeyboardInput>,
     mut cmdline_query: Query<&mut TextSpan, With<DevCommandlineTextMarker>>,
+    mut commands: Commands,
+    dev_comands: Res<DevCommandList>,
 ) {
     let mut text = cmdline_query.single_mut();
 
@@ -112,7 +117,20 @@ fn update_cmdline(
 
         match &event.logical_key {
             Key::Enter => {
-                println!("Command: {}", text.0);
+                match dev_comands.0.get_ancestor_value(&text.0) {
+                    Some(dev_cmd) => {
+                        let args = &text
+                            .0
+                            .strip_prefix(dev_cmd.prefix())
+                            .expect("Command text should always start with itself")
+                            .trim();
+
+                        dev_cmd.run(&mut commands, args);
+                    }
+                    None => {
+                        info!("Incorrect Command")
+                    }
+                };
                 text.0.clear();
             }
             Key::Backspace => {

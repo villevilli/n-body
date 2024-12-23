@@ -1,19 +1,34 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
-use n_body_platformer::commands::DevCommandline;
+use n_body_platformer::commands::{
+    command_parser::{DevCommand, DevCommandList},
+    DevCommandlinePlugin,
+};
 
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
+    let mut app = App::new();
+    app.add_plugins(DefaultPlugins)
         .add_plugins(EguiPlugin)
-        .add_plugins(DevCommandline)
         .add_systems(Startup, setup)
-        .add_systems(Update, ui_system)
+        .add_systems(Update, ui_system);
+
+    let commands = DevCommandList::new().add_command(DevCommand::<String>::new(
+        "info",
+        IntoSystem::into_system(info_cmd),
+        app.world_mut(),
+    ));
+
+    app.add_plugins(DevCommandlinePlugin)
+        .insert_resource(commands)
         .run();
 }
 
 fn ui_system(mut context: EguiContexts) {
     egui::Window::new("Hello Gui").show(context.ctx_mut(), |ui| ui.label("World"));
+}
+
+fn info_cmd(text: In<String>) {
+    info!("{}", text.0);
 }
 
 fn setup(mut commands: Commands) {
