@@ -1,3 +1,4 @@
+pub mod commands;
 pub mod mouse_camera_control;
 pub mod physics;
 pub mod world_constructor;
