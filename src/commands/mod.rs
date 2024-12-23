@@ -9,6 +9,7 @@ use bevy::{
     prelude::*,
 };
 use command_parser::DevCommandList;
+use radix_trie::TrieCommon;
 
 const CMDLINE_FONT_SIZE: f32 = 16.0;
 const CMDLINE_FONT: &str = "fonts/FiraMono-Regular.ttf";
@@ -132,6 +133,13 @@ fn update_cmdline(
                     }
                 };
                 text.0.clear();
+            }
+            Key::Tab => {
+                if let Some(subtrie) = dev_comands.0.get_raw_descendant(&text.0) {
+                    if let Some(key) = subtrie.key() {
+                        text.0 = key.to_string();
+                    }
+                }
             }
             Key::Backspace => {
                 text.0.pop();
