@@ -1,7 +1,8 @@
 use bevy::color::palettes::css::*;
 use bevy::{math::vec2, prelude::*};
+use n_body_platformer::commands::command_parser::{DevCommand, DevCommandList};
+use n_body_platformer::commands::{CmdlineState, DevCommandlinePlugin};
 use n_body_platformer::mouse_camera_control::CameraSettings;
-use n_body_platformer::print_state_on_change;
 use n_body_platformer::world_constructor::LevelBuilderPlugin;
 use n_body_platformer::{
     mouse_camera_control::MouseCameraControl,
@@ -66,27 +67,39 @@ fn main() {
         ))
         .insert_state(AlwaysOn);
 
+    let dev_commands = DevCommandList::new().add_command(DevCommand::new(
+        "setsimspeed",
+        IntoSystem::into_system(set_sim_speed),
+        app.world_mut(),
+    ));
+
+    app.insert_resource(dev_commands)
+        .add_plugins(DevCommandlinePlugin);
+
     #[cfg(not(target_family = "wasm"))]
     app.insert_state(SimulationState::Paused);
 
     #[cfg(target_family = "wasm")]
     app.insert_state(SimulationState::Running);
 
-    app.add_systems(
-        Update,
-        (
-            keyboard_state_changer,
-            print_state_on_change::<SimulationState>,
-        ),
-    )
-    .run();
+    app.add_systems(Update, (keyboard_state_changer,)).run();
+}
+
+fn set_sim_speed(speed: In<f32>, mut time: ResMut<Time<Virtual>>) {
+    info!("Sim speed multiplier set to: {}", speed.0);
+    time.set_relative_speed(speed.0);
 }
 
 fn keyboard_state_changer(
     keys: Res<ButtonInput<KeyCode>>,
+    cmdline_state: Res<State<CmdlineState>>,
     sim_state: Res<State<SimulationState>>,
     mut next_sim_state: ResMut<NextState<SimulationState>>,
 ) {
+    if cmdline_state.get() == &CmdlineState::Open {
+        return;
+    }
+
     if keys.just_pressed(KeyCode::Space) {
         use SimulationState::*;
 

@@ -15,7 +15,7 @@ const CMDLINE_FONT_SIZE: f32 = 16.0;
 const CMDLINE_FONT: &str = "fonts/FiraMono-Regular.ttf";
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
-enum CmdlineState {
+pub enum CmdlineState {
     Open,
     Closed,
 }

@@ -56,7 +56,14 @@ where
     I::Err: Error + 'static,
 {
     fn run(&self, commands: &mut Commands, args: &str) {
-        commands.run_system_with_input(self.system_id, args.parse().unwrap());
+        match args.parse() {
+            Ok(args) => {
+                commands.run_system_with_input(self.system_id, args);
+            }
+            Err(e) => {
+                warn!("Error running command {}: {}", self.name, e,)
+            }
+        }
     }
 
     fn prefix(&self) -> &'static str {
