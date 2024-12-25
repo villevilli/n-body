@@ -1,6 +1,6 @@
 #![feature(never_type)]
 
-use bevy::prelude::*;
+use bevy::{picking::pointer::PointerLocation, prelude::*};
 use n_body_platformer::{mouse_camera_control::MouseCameraControl, physics::PhysicsPlugin};
 
 #[derive(States, Debug, PartialEq, Eq, Clone, Hash)]
@@ -26,8 +26,14 @@ fn main() {
         ))
         .insert_state(AlwaysOn)
         .insert_state(SimulationState::Paused)
-        .add_systems(Update, keyboard_state_changer)
+        .add_systems(Update, (keyboard_state_changer, picking_test))
         .run();
+}
+
+fn picking_test(picking: Query<&PointerLocation>) {
+    if let Some(pickign) = &picking.single().location {
+        info!("Picking loc: {:?}", pickign);
+    }
 }
 
 fn keyboard_state_changer(

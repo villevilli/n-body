@@ -7,7 +7,7 @@ use bevy::{
 const SENSITIVITY: f32 = 0.10;
 
 #[derive(Component)]
-struct MainCameraMarker;
+pub struct MainCameraMarker;
 
 #[derive(Default)]
 pub struct MouseCameraControl<S: States> {

@@ -46,7 +46,7 @@ where
 }
 
 pub(super) trait Runnable {
-    fn run(&self, commands: &mut Commands, args: &str);
+    fn run(&self, commands: &mut Commands, args: &str) -> Option<String>;
     fn prefix(&self) -> &'static str;
 }
 
@@ -55,13 +55,15 @@ where
     I: FromStr + Send + Sync + 'static,
     I::Err: Error + 'static,
 {
-    fn run(&self, commands: &mut Commands, args: &str) {
+    fn run(&self, commands: &mut Commands, args: &str) -> Option<String> {
         match args.parse() {
             Ok(args) => {
                 commands.run_system_with_input(self.system_id, args);
+                None
             }
             Err(e) => {
-                warn!("Error running command {}: {}", self.name, e,)
+                warn!("Error running command {}: {}", self.name, e);
+                Some(e.to_string())
             }
         }
     }

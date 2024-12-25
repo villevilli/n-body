@@ -2,7 +2,8 @@ use bevy::color::palettes::css::*;
 use bevy::{math::vec2, prelude::*};
 use n_body_platformer::commands::command_parser::{DevCommand, DevCommandList};
 use n_body_platformer::commands::{CmdlineState, DevCommandlinePlugin};
-use n_body_platformer::mouse_camera_control::CameraSettings;
+use n_body_platformer::edit_tools::picking_backend_physics;
+use n_body_platformer::mouse_camera_control::{CameraSettings, MainCameraMarker};
 use n_body_platformer::world_constructor::LevelBuilderPlugin;
 use n_body_platformer::{
     mouse_camera_control::MouseCameraControl,
@@ -65,10 +66,12 @@ fn main() {
             },
             LevelBuilderPlugin(level),
         ))
+        .add_systems(Update, picking_backend_physics::<MainCameraMarker>)
+        .add_systems(Update, read_clicks)
         .insert_state(AlwaysOn);
 
     let dev_commands = DevCommandList::new().add_command(DevCommand::new(
-        "setsimspeed",
+        "simspeed",
         IntoSystem::into_system(set_sim_speed),
         app.world_mut(),
     ));
@@ -83,6 +86,13 @@ fn main() {
     app.insert_state(SimulationState::Running);
 
     app.add_systems(Update, (keyboard_state_changer,)).run();
+}
+
+fn read_clicks(click: EventReader<Pointer<Click>>) {
+    if click.is_empty() {
+        return;
+    }
+    info!("Clicked Physics Object")
 }
 
 fn set_sim_speed(speed: In<f32>, mut time: ResMut<Time<Virtual>>) {

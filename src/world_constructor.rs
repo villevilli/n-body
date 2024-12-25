@@ -1,5 +1,5 @@
-use crate::physics::{PhysicsMaterial, PhysicsTransform, PhysicsVelocity};
-use bevy::prelude::*;
+use crate::physics::{Collider, PhysicsMaterial, PhysicsTransform, PhysicsVelocity};
+use bevy::{math::bounding::BoundingCircle, prelude::*};
 use std::f32::consts::PI;
 
 const PLANET_DENSITY: f32 = 1.0;
@@ -116,6 +116,10 @@ fn construct_level_system(
                     dynamic_planet,
                     Mesh2d(meshes.add(Circle::new(style.radius))),
                     MeshMaterial2d(materials.add(style.color)),
+                    Collider(BoundingCircle {
+                        center: Vec2::ZERO,
+                        circle: Circle::new(style.radius),
+                    }),
                 ));
             }
             SomePlanet::StaticPlanet(static_planet) => {
@@ -125,6 +129,10 @@ fn construct_level_system(
                     static_planet,
                     Mesh2d(meshes.add(Circle::new(style.radius))),
                     MeshMaterial2d(materials.add(style.color)),
+                    Collider(BoundingCircle {
+                        center: Vec2::ZERO,
+                        circle: Circle::new(style.radius),
+                    }),
                 ));
             }
         }

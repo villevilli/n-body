@@ -1,3 +1,4 @@
+use bevy::math::bounding::BoundingCircle;
 use bevy::{color::palettes::css::LIGHT_BLUE, prelude::*};
 
 const GRAVITATIONAL_CONSTANT: f32 = 6740.0;
@@ -15,6 +16,9 @@ impl<S: States> Plugin for PhysicsPlugin<S> {
         app.add_systems(Update, move_physics_entities_visual);
     }
 }
+
+#[derive(Component, Debug)]
+pub struct Collider(pub BoundingCircle);
 
 #[derive(Component, Clone, Copy)]
 pub struct PhysicsTransform {
@@ -109,10 +113,16 @@ fn calculate_physics(
     });
 }
 
-fn move_physics_entities_visual(mut query: Query<(&mut Transform, &PhysicsTransform)>) {
-    for (mut transform, physics_transform) in &mut query {
+fn move_physics_entities_visual(
+    mut query: Query<(&mut Transform, &PhysicsTransform, Option<&mut Collider>)>,
+) {
+    for (mut transform, physics_transform, mut collider) in query.iter_mut() {
         transform.translation.x = physics_transform.location.x;
         transform.translation.y = physics_transform.location.y;
+
+        if let Some(collider) = collider.as_mut() {
+            collider.0.center = physics_transform.location;
+        }
     }
 }
 
