@@ -3,12 +3,12 @@ use bevy::{math::vec2, prelude::*};
 use n_body_platformer::commands::command_parser::{DevCommand, DevCommandList};
 use n_body_platformer::commands::{CmdlineState, DevCommandlinePlugin};
 use n_body_platformer::edit_tools::picking_backend_physics;
+use n_body_platformer::level_builder::LevelBuilderPlugin;
 use n_body_platformer::mouse_camera_control::{CameraSettings, MainCameraMarker};
-use n_body_platformer::world_constructor::LevelBuilderPlugin;
 use n_body_platformer::{
+    level_builder::{LevelBuilder, PlanetBuilder},
     mouse_camera_control::MouseCameraControl,
     physics::PhysicsPlugin,
-    world_constructor::{LevelBuilder, PlanetBuilder},
 };
 
 #[derive(States, Debug, PartialEq, Eq, Clone, Hash)]

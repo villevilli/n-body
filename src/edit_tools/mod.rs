@@ -1,3 +1,6 @@
+pub mod window;
+use std::marker::{PhantomData, PhantomPinned};
+
 use bevy::{
     math::bounding::{BoundingCircle, IntersectsVolume},
     picking::{
@@ -6,8 +9,26 @@ use bevy::{
     },
     prelude::*,
 };
+use window::{detect_clicks, edit_windows};
 
 use crate::physics::Collider;
+
+pub struct EditTools<T>
+where
+    T: Component,
+{
+    pub main_camera_type: PhantomData<T>,
+}
+
+impl<T> Plugin for EditTools<T>
+where
+    T: Component,
+{
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, (picking_backend_physics::<T>, detect_clicks));
+        app.add_systems(Update, edit_windows);
+    }
+}
 
 ///T is marker component for the main camera
 pub fn picking_backend_physics<T>(

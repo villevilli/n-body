@@ -1,3 +1,5 @@
+use std::default;
+
 use bevy::{
     input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll, MouseScrollUnit},
     prelude::*,
@@ -15,10 +17,19 @@ pub struct MouseCameraControl<S: States> {
     pub camera_settings: CameraSettings,
 }
 
-#[derive(Default, Clone)]
+#[derive(Clone)]
 pub struct CameraSettings {
     pub pos: Vec2,
     pub zoom: f32,
+}
+
+impl Default for CameraSettings {
+    fn default() -> Self {
+        Self {
+            pos: Default::default(),
+            zoom: 1.0,
+        }
+    }
 }
 
 #[derive(Event)]
