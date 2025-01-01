@@ -1,6 +1,6 @@
 use bevy::color::palettes::css::*;
 use bevy::{math::vec2, prelude::*};
-use n_body_platformer::commands::command_parser::{DevCommand, DevCommandList};
+use n_body_platformer::commands::command_parser::DevCommandList;
 use n_body_platformer::commands::{CmdlineState, DevCommandlinePlugin};
 use n_body_platformer::edit_tools::picking_backend_physics;
 use n_body_platformer::level_builder::LevelBuilderPlugin;
@@ -70,11 +70,7 @@ fn main() {
         .add_systems(Update, read_clicks)
         .insert_state(AlwaysOn);
 
-    let dev_commands = DevCommandList::new().add_command(DevCommand::new(
-        "simspeed",
-        IntoSystem::into_system(set_sim_speed),
-        app.world_mut(),
-    ));
+    let dev_commands = DevCommandList::new().add_default_commands(app.world_mut());
 
     app.insert_resource(dev_commands)
         .add_plugins(DevCommandlinePlugin);
@@ -93,11 +89,6 @@ fn read_clicks(click: EventReader<Pointer<Click>>) {
         return;
     }
     info!("Clicked Physics Object")
-}
-
-fn set_sim_speed(speed: In<f32>, mut time: ResMut<Time<Virtual>>) {
-    info!("Sim speed multiplier set to: {}", speed.0);
-    time.set_relative_speed(speed.0);
 }
 
 fn keyboard_state_changer(

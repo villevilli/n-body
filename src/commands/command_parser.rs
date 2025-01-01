@@ -19,11 +19,27 @@ impl DevCommandList {
             .insert(dev_command.name.to_string(), Box::new(dev_command));
         self
     }
+
+    /// Default commands include the following commands:
+    /// - ```setclockspeed [f32]``` sets a multiplier on speed that
+    /// the bevy clock advances by
+    pub fn add_default_commands(self, world: &mut World) -> Self {
+        self.add_command(DevCommand::new(
+            "setclockspeed",
+            IntoSystem::into_system(set_speed_multiplier),
+            world,
+        ))
+    }
+}
+
+fn set_speed_multiplier(speed: In<f32>, mut time: ResMut<Time<Virtual>>) {
+    info!("Sim speed multiplier set to: {}", speed.0);
+    time.set_relative_speed(speed.0);
 }
 
 pub struct DevCommand<I>
 where
-    I: FromStr + Send + Sync + 'static,
+    I: Send + Sync + 'static,
 {
     name: &'static str,
     pub(super) system_id: SystemId<In<I>, ()>,
