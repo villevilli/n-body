@@ -7,19 +7,45 @@ use bevy_egui::{
 use crate::physics::{PhysicsMaterial, PhysicsTransform, PhysicsVelocity};
 
 #[derive(Component, Default)]
-pub struct OpenWindow(bool);
+pub struct OpenWindow {
+    is_open: bool,
+    just_changed: bool,
+}
 
-pub fn detect_clicks(mut clicks: EventReader<Pointer<Click>>, mut commands: Commands) {
+impl OpenWindow {
+    pub fn new(is_open: bool) -> Self {
+        Self {
+            is_open,
+            just_changed: true,
+        }
+    }
+
+    pub fn get(&self) -> bool {
+        self.is_open
+    }
+
+    pub fn set(&mut self, is_open: bool) {
+        self.is_open = is_open;
+        self.just_changed = true;
+    }
+
+    pub fn toggle(&mut self) {
+        self.is_open = !self.is_open;
+        self.just_changed = true;
+    }
+}
+
+pub(super) fn detect_clicks(mut clicks: EventReader<Pointer<Click>>, mut commands: Commands) {
     for click in clicks.read() {
         commands
             .entity(click.target)
             .entry::<OpenWindow>()
             .or_default()
-            .and_modify(|mut is_open| is_open.0 = !is_open.0);
+            .and_modify(|mut is_open| is_open.toggle());
     }
 }
 
-pub fn edit_windows(
+pub(super) fn edit_windows(
     mut commands: Commands,
     mut context: EguiContexts,
     mut materials: ResMut<Assets<ColorMaterial>>,
@@ -31,7 +57,10 @@ pub fn edit_windows(
         Option<&mut PhysicsVelocity>,
         Option<&mut PhysicsMaterial>,
     )>,
+    window_query: Query<&Window>,
 ) {
+    let cursor_pos = window_query.single().cursor_position();
+
     for (
         entity,
         mut open_window,
@@ -41,9 +70,18 @@ pub fn edit_windows(
         physics_material,
     ) in window_object_query.iter_mut()
     {
-        egui::Window::new(format!("Planet Editor {}", entity.index()))
+        let mut window = egui::Window::new(format!("Planet Editor {}", entity.index()));
+
+        if let Some(cursor_pos) = cursor_pos
+            && open_window.just_changed
+        {
+            window = window.current_pos(cursor_pos.to_array());
+            open_window.just_changed = false;
+        }
+
+        window
             .resizable([false; 2])
-            .open(&mut open_window.0)
+            .open(&mut open_window.is_open)
             .show(context.ctx_mut(), |ui| {
                 egui::Grid::new("lol").show(ui, |ui| {
                     if let Some(Some(material)) =

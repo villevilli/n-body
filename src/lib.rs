@@ -1,3 +1,5 @@
+#![feature(let_chains)]
+
 pub mod commands;
 pub mod edit_tools;
 pub mod level_builder;
