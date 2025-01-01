@@ -25,7 +25,7 @@ pub fn edit_windows(
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut window_object_query: Query<(
         Entity,
-        &OpenWindow,
+        &mut OpenWindow,
         Option<&mut MeshMaterial2d<ColorMaterial>>,
         Option<&mut PhysicsTransform>,
         Option<&mut PhysicsVelocity>,
@@ -34,19 +34,16 @@ pub fn edit_windows(
 ) {
     for (
         entity,
-        open_window,
+        mut open_window,
         color_material,
         physics_transform,
         physics_velocity,
         physics_material,
     ) in window_object_query.iter_mut()
     {
-        if !open_window.0 {
-            continue;
-        }
-
         egui::Window::new(format!("Planet Editor {}", entity.index()))
             .resizable([false; 2])
+            .open(&mut open_window.0)
             .show(context.ctx_mut(), |ui| {
                 egui::Grid::new("lol").show(ui, |ui| {
                     if let Some(Some(material)) =
