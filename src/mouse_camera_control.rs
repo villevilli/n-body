@@ -6,7 +6,7 @@ use bevy::{
 
 const SENSITIVITY: f32 = 0.10;
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct MainCameraMarker;
 
 #[derive(Default)]

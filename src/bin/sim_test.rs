@@ -1,8 +1,9 @@
 use bevy::color::palettes::css::*;
 use bevy::{math::vec2, prelude::*};
+use bevy_egui::EguiPlugin;
 use n_body_platformer::commands::command_parser::DevCommandList;
 use n_body_platformer::commands::{CmdlineState, DevCommandlinePlugin};
-use n_body_platformer::edit_tools::picking_backend_physics;
+use n_body_platformer::edit_tools::{picking_backend_physics, EditingToolsPlugin};
 use n_body_platformer::level_builder::LevelBuilderPlugin;
 use n_body_platformer::mouse_camera_control::{CameraSettings, MainCameraMarker};
 use n_body_platformer::{
@@ -61,13 +62,14 @@ fn main() {
                     ..Default::default()
                 },
             },
+            EguiPlugin,
             PhysicsPlugin {
                 running_state: SimulationState::Running,
             },
             LevelBuilderPlugin(level),
+            EditingToolsPlugin::<MainCameraMarker>::default(),
         ))
         .add_systems(Update, picking_backend_physics::<MainCameraMarker>)
-        .add_systems(Update, read_clicks)
         .insert_state(AlwaysOn);
 
     let dev_commands = DevCommandList::new().add_default_commands(app.world_mut());
@@ -82,13 +84,6 @@ fn main() {
     app.insert_state(SimulationState::Running);
 
     app.add_systems(Update, (keyboard_state_changer,)).run();
-}
-
-fn read_clicks(click: EventReader<Pointer<Click>>) {
-    if click.is_empty() {
-        return;
-    }
-    info!("Clicked Physics Object")
 }
 
 fn keyboard_state_changer(

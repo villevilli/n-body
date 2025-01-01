@@ -19,6 +19,7 @@ use crate::physics::Collider;
 /// ##Usage
 /// T should be the main camera as it is used to compute the position of
 /// mouse clicks within the game world
+#[derive(Default)]
 pub struct EditingToolsPlugin<T>
 where
     T: Component,
