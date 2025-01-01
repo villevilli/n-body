@@ -1,5 +1,5 @@
 pub mod window;
-use std::marker::{PhantomData, PhantomPinned};
+use std::marker::PhantomData;
 
 use bevy::{
     math::bounding::{BoundingCircle, IntersectsVolume},
@@ -13,14 +13,20 @@ use window::{detect_clicks, edit_windows};
 
 use crate::physics::Collider;
 
-pub struct EditTools<T>
+/// This Plugin contains a picking backend for the physics objects and
+/// custom egui editor for editing physics objects
+///
+/// ##Usage
+/// T should be the main camera as it is used to compute the position of
+/// mouse clicks within the game world
+pub struct EditingToolsPlugin<T>
 where
     T: Component,
 {
     pub main_camera_type: PhantomData<T>,
 }
 
-impl<T> Plugin for EditTools<T>
+impl<T> Plugin for EditingToolsPlugin<T>
 where
     T: Component,
 {
@@ -29,6 +35,8 @@ where
         app.add_systems(Update, edit_windows);
     }
 }
+
+//TODO this should probably be independant of the edit tools
 
 ///T is marker component for the main camera
 pub fn picking_backend_physics<T>(

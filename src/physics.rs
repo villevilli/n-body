@@ -38,7 +38,7 @@ pub struct PhysicsMaterial {
 
 #[derive(Component, Clone, Copy, Default)]
 pub struct PhysicsVelocity {
-    velocity: Vec2,
+    pub(crate) velocity: Vec2,
     acceleration: Vec2,
 }
 
