@@ -9,7 +9,9 @@ use bevy::{
     },
     prelude::*,
 };
-use window::{detect_clicks, edit_windows};
+use window::{
+    create_planet_window, detect_clicks, detect_planet_creation, edit_windows, CreateNewPlanet,
+};
 
 use crate::physics::Collider;
 
@@ -32,8 +34,17 @@ where
     T: Component,
 {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (picking_backend_physics::<T>, detect_clicks));
-        app.add_systems(Update, edit_windows);
+        app.add_event::<CreateNewPlanet>();
+        app.add_systems(
+            Update,
+            (
+                picking_backend_physics::<T>,
+                detect_planet_creation::<T>,
+                detect_clicks,
+                edit_windows,
+                create_planet_window,
+            ),
+        );
     }
 }
 
