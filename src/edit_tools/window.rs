@@ -79,6 +79,7 @@ pub(super) fn detect_planet_creation<T>(
 }
 
 pub(super) fn create_planet_window(
+    mut gizmos: Gizmos,
     mut create_planet_event: EventReader<CreateNewPlanet>,
     mut current_planet: Local<Option<PlanetBuilder>>,
     mut is_open: Local<bool>,
@@ -105,6 +106,15 @@ pub(super) fn create_planet_window(
     };
 
     let mut should_close = false;
+
+    //Draw gizmos for planet preview
+    gizmos.circle_2d(
+        current_planet.position,
+        current_planet
+            .radius
+            .unwrap_or(calculate_radius(current_planet.mass)),
+        current_planet.color.with_alpha(0.6),
+    );
 
     window
         .resizable([false; 2])
