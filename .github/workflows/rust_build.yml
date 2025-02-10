@@ -12,9 +12,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
-    - uses: actions/cache@v4
+    - name: Install Dependancies
+      run: |
+        sudo apt-get update
+        sudo apt-get install libasound2-dev
+        sudo apt-get install libudev-dev
+
+    - name: Setup rust nightly toolchain
+      run: rustup toolchain default nightly
+
+    - name: Cache rust build artifacts
+      uses: actions/cache@v4
       with:
         path: |
           ~/.cargo/bin/
@@ -27,11 +38,7 @@ jobs:
           ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           ${{ runner.os }}-cargo-
     
-    - name: Install Dependancies
-      run: |
-        sudo apt-get update
-        sudo apt-get install libasound2-dev
-        sudo apt-get install libudev-dev
+
       
     - name: Build
       run: cargo build --verbose
