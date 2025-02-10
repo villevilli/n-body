@@ -1,4 +1,7 @@
-use crate::physics::{Collider, PhysicsMaterial, PhysicsTransform, PhysicsVelocity};
+use crate::{
+    graphics::trails::Trail,
+    physics::{Collider, PhysicsMaterial, PhysicsTransform, PhysicsVelocity},
+};
 use bevy::{math::bounding::BoundingCircle, prelude::*};
 use std::f32::consts::PI;
 
@@ -51,6 +54,7 @@ impl SomePlanet {
                         center: Vec2::ZERO,
                         circle: Circle::new(style.radius),
                     }),
+                    Trail::default(),
                 ));
             }
             SomePlanet::StaticPlanet(static_planet) => {

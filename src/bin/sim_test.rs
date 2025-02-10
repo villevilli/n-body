@@ -1,9 +1,12 @@
+use std::time::Duration;
+
 use bevy::color::palettes::css::*;
 use bevy::{math::vec2, prelude::*};
 use bevy_egui::EguiPlugin;
 use n_body_platformer::commands::command_parser::DevCommandList;
 use n_body_platformer::commands::{CmdlineState, DevCommandlinePlugin};
 use n_body_platformer::edit_tools::{picking_backend_physics, EditingToolsPlugin};
+use n_body_platformer::graphics::trails::{draw_trail, update_trail, TrailUpdateConfig};
 use n_body_platformer::level_builder::LevelBuilderPlugin;
 use n_body_platformer::mouse_camera_control::{CameraSettings, MainCameraMarker};
 use n_body_platformer::{
@@ -69,7 +72,12 @@ fn main() {
             LevelBuilderPlugin(level),
             EditingToolsPlugin::<MainCameraMarker>::default(),
         ))
+        .insert_resource(TrailUpdateConfig(Timer::new(
+            Duration::from_millis(50),
+            TimerMode::Repeating,
+        )))
         .add_systems(Update, picking_backend_physics::<MainCameraMarker>)
+        .add_systems(FixedUpdate, (update_trail, draw_trail).chain())
         .insert_state(AlwaysOn);
 
     let dev_commands = DevCommandList::new().add_default_commands(app.world_mut());
