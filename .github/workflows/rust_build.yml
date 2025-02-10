@@ -18,9 +18,8 @@ jobs:
     - name: Install Dependancies
       run: |
         sudo apt-get update
-        sudo apt-get install libasound2-dev
-        sudo apt-get install libudev-dev
-
+        sudo apt-get install libasound2-dev libudev-dev
+        
     - name: Setup rust nightly toolchain
       run: rustup default nightly
 
