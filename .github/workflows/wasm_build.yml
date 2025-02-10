@@ -46,6 +46,7 @@ jobs:
         wasm-bindgen --out-name sim_test --out-dir web/ --target web target/wasm32-unknown-unknown/wasm-release/sim_test.wasm
     
     - name: Upload wasm as artifact
+      if: github.ref == 'refs/heads/main'
       id: deployment
       uses: actions/upload-pages-artifact@v3
       with: 
