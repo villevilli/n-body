@@ -37,7 +37,6 @@ jobs:
           ${{ runner.os }}-cargo-wasm${{ hashFiles('**/Cargo.lock') }}
           ${{ runner.os }}-cargo-wasm    
 
-    - uses: actions/checkout@v4
     - name: Build wasm
       id: build
       run: |
@@ -45,6 +44,7 @@ jobs:
         cargo install wasm-bindgen-cli
         cargo build --target wasm32-unknown-unknown --profile wasm-release --verbose
         wasm-bindgen --out-name sim_test --out-dir web/ --target web target/wasm32-unknown-unknown/wasm-release/sim_test.wasm
+    
     - name: Upload wasm as artifact
       id: deployment
       uses: actions/upload-pages-artifact@v3
