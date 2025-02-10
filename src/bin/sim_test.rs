@@ -67,7 +67,7 @@ fn main() {
                 running_state: SimulationState::Running,
             },
             LevelBuilderPlugin(level),
-            EditingToolsPlugin::<MainCameraMarker>::default(),
+            //            EditingToolsPlugin::<MainCameraMarker>::default(),
         ))
         .add_systems(Update, picking_backend_physics::<MainCameraMarker>)
         .insert_state(AlwaysOn);

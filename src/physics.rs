@@ -17,10 +17,10 @@ impl<S: States> Plugin for PhysicsPlugin<S> {
     }
 }
 
-#[derive(Component, Debug)]
+#[derive(Component, Reflect, Debug)]
 pub struct Collider(pub BoundingCircle);
 
-#[derive(Component, Clone, Copy)]
+#[derive(Component, Reflect, Clone, Copy)]
 pub struct PhysicsTransform {
     pub(crate) location: Vec2,
 }
@@ -31,14 +31,16 @@ impl PhysicsTransform {
     }
 }
 
-#[derive(Component, Clone, Copy)]
+#[derive(Component, Reflect, Clone, Copy, serde::Serialize, serde::Deserialize)]
+#[reflect(Component, Serialize, Deserialize)]
 pub struct PhysicsMaterial {
     pub mass: f32,
 }
 
-#[derive(Component, Clone, Copy, Default)]
+#[derive(Component, Reflect, Clone, Copy, Default)]
 pub struct PhysicsVelocity {
     pub(crate) velocity: Vec2,
+    #[reflect(skip_serializing)]
     acceleration: Vec2,
 }
 

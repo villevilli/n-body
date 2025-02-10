@@ -2,6 +2,8 @@ use bevy::{ecs::system::SystemId, prelude::*};
 use radix_trie::Trie;
 use std::{error::Error, str::FromStr};
 
+use crate::saving::save_state;
+
 #[derive(Resource)]
 pub struct DevCommandList(pub(super) Trie<String, Box<dyn Runnable + Sync + Send>>);
 
@@ -27,6 +29,11 @@ impl DevCommandList {
         self.add_command(DevCommand::new(
             "setclockspeed",
             IntoSystem::into_system(set_speed_multiplier),
+            world,
+        ))
+        .add_command(DevCommand::new(
+            "save",
+            IntoSystem::into_system(save_state),
             world,
         ))
     }

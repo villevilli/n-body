@@ -5,6 +5,7 @@ pub mod edit_tools;
 pub mod level_builder;
 pub mod mouse_camera_control;
 pub mod physics;
+pub mod saving;
 
 use bevy::prelude::*;
 
