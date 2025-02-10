@@ -19,9 +19,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install libasound2-dev libudev-dev
 
-    - name: Setup rust nightly toolchain
-      run: rustup default nightly
-
     - name: Cache rust build artifacts
       uses: actions/cache@v4
       with:
@@ -36,11 +33,14 @@ jobs:
           ${{ runner.os }}-cargo-wasm${{ hashFiles('**/Cargo.lock') }}
           ${{ runner.os }}-cargo-wasm    
 
+    - name: Setup rust nightly toolchain
+      run: rustup default nightly
+
     - name: Build wasm
       id: build
       run: |
         rustup target install wasm32-unknown-unknown
-        cargo install wasm-bindgen-cli
+        cargo install wasm-bindgen-cli --force
         cargo build --target wasm32-unknown-unknown --profile wasm-release --verbose
         wasm-bindgen --out-name sim_test --out-dir web/ --target web target/wasm32-unknown-unknown/wasm-release/sim_test.wasm
     
