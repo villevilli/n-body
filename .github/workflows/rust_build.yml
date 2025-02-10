@@ -1,4 +1,4 @@
-name: Rust
+name: Rust Build
 
 on:
   push:
@@ -31,6 +31,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install libasound2-dev
+        sudo apt-get install libudev-dev
       
     - name: Build
       run: cargo build --verbose
