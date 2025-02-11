@@ -98,7 +98,7 @@ fn camera_mouse_control(
     }
 
     if mouse_scroll.delta.y != 0.0 {
-        let window_middle: Vec2 = window.physical_size().as_vec2() * 0.5;
+        let window_middle: Vec2 = window.size() * 0.5;
         let mut zoom_amount = projection.scale * mouse_scroll.delta.y * SENSITIVITY;
 
         if mouse_scroll.unit == MouseScrollUnit::Pixel {
