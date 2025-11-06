@@ -21,9 +21,12 @@ inherits = "release"
 opt-level = "s"
 # Strip all debugging information from the binary to slightly reduce file size.
 strip = "debuginfo"
+# lto = true
+# codegen-units = 1
 
 [dependencies]
 bevy = "0.17"
 bevy_egui = "0.38"
 radix_trie = "0.2.1"
-rand = "0.8.5"
+rand = "0.9"
+getrandom = { version = "0.3", features = ["wasm_js", "std"] }

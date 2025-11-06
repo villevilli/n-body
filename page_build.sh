@@ -1,4 +1,10 @@
-#!/usr/bin/sh
+#!/bin/sh
+
+export RUSTFLAGS='--cfg getrandom_backend="wasm_js"'
+
+# Fail on error
+set -e
+
 echo "Building Rust"
 cargo build --target wasm32-unknown-unknown --profile wasm-release
 
