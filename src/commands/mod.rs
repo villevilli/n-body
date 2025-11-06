@@ -67,7 +67,7 @@ fn enter_cmdline(mut commands: Commands, assets: Res<AssetServer>) {
             },
             TextColor(WHITE.into()),
             TextLayout {
-                justify: JustifyText::Left,
+                justify: Justify::Left,
                 ..Default::default()
             },
             Node {
@@ -100,7 +100,7 @@ fn exit_cmdline(
 }
 
 fn update_cmdline(
-    mut ev_kb_input: EventReader<KeyboardInput>,
+    mut ev_kb_input: MessageReader<KeyboardInput>,
     mut cmdline_query: Query<&mut TextSpan, With<DevCommandlineTextMarker>>,
     mut commands: Commands,
     dev_comands: Res<DevCommandList>,

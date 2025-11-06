@@ -9,9 +9,10 @@ use bevy::{
     },
     prelude::*,
 };
-use bevy_egui::EguiPrimaryContextPass;
+use bevy_egui::{EguiPrimaryContextPass, egui::Ui};
 use window::{
-    CreateNewPlanet, create_planet_window, detect_clicks, detect_planet_creation, edit_windows,
+    CreateNewPlanet, create_planet_window, detect_planet_creation, edit_windows,
+    toggle_editor_window,
 };
 
 use crate::physics::Collider;
@@ -35,29 +36,25 @@ where
     T: Component,
 {
     fn build(&self, app: &mut App) {
-        app.add_event::<CreateNewPlanet>();
+        app.add_message::<CreateNewPlanet>();
         app.add_systems(
             Update,
-            (
-                picking_backend_physics::<T>,
-                detect_planet_creation::<T>,
-                detect_clicks,
-            ),
+            (picking_backend_physics::<T>, detect_planet_creation::<T>),
         );
         app.add_systems(EguiPrimaryContextPass, (edit_windows, create_planet_window));
+        app.add_observer(toggle_editor_window);
     }
 }
 
 //TODO this should probably be independant of the edit tools
 
-///T is marker component for the main camera
-pub fn picking_backend_physics<T>(
-    camera_query: Query<(Entity, &Camera, &GlobalTransform), With<T>>,
+pub fn picking_backend_physics<MainCameraMarker>(
+    camera_query: Query<(Entity, &Camera, &GlobalTransform), With<MainCameraMarker>>,
     pointer_locations: Query<(&PointerLocation, &PointerId)>,
     physics_objects: Query<(&Collider, Entity)>,
-    mut ew_pointerhits: EventWriter<PointerHits>,
+    mut ew_pointerhits: MessageWriter<PointerHits>,
 ) where
-    T: Component,
+    MainCameraMarker: Component,
 {
     let Ok((camera_entity, camera, camera_global_transform)) = camera_query.single() else {
         panic!("Missing camera to initialize picking backend")
@@ -92,4 +89,8 @@ pub fn picking_backend_physics<T>(
             }
         }
     }
+}
+
+pub trait EditableComponent: Component {
+    fn edit_ui(&mut self, ui: &mut Ui);
 }

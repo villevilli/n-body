@@ -30,7 +30,7 @@ impl Default for CameraSettings {
     }
 }
 
-#[derive(Event)]
+#[derive(Message)]
 pub struct CameraSettingsChange(CameraSettings);
 
 impl<S> Plugin for MouseCameraControl<S>
@@ -59,7 +59,7 @@ fn setup(mut commands: Commands) {
 
 fn initial_set_camera_position(
     camera_settings: In<CameraSettings>,
-    mut ew_set_camera_pos: EventWriter<CameraSettingsChange>,
+    mut ew_set_camera_pos: MessageWriter<CameraSettingsChange>,
 ) {
     ew_set_camera_pos.write(CameraSettingsChange(camera_settings.0));
 }

@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{ecs::component::Mutable, prelude::*};
 use bevy_egui::{
     EguiContexts,
     egui::{self, DragValue, Grid, Ui},
@@ -6,20 +6,21 @@ use bevy_egui::{
 use rand::random;
 
 use crate::{
+    edit_tools::EditableComponent,
     level_builder::{PlanetBuilder, calculate_radius},
     physics::{PhysicsMaterial, PhysicsTransform, PhysicsVelocity},
 };
 
-#[derive(Event)]
+#[derive(Message)]
 pub(super) struct CreateNewPlanet(Vec2);
 
 #[derive(Component, Default)]
-pub struct OpenWindow {
+pub struct EditorWindow {
     is_open: bool,
     just_changed: bool,
 }
 
-impl OpenWindow {
+impl EditorWindow {
     pub fn new(is_open: bool) -> Self {
         Self {
             is_open,
@@ -42,14 +43,13 @@ impl OpenWindow {
     }
 }
 
-pub(super) fn detect_clicks(mut clicks: EventReader<Pointer<Click>>, mut commands: Commands) {
-    for click in clicks.read() {
-        commands
-            .entity(click.target)
-            .entry::<OpenWindow>()
-            .or_default()
-            .and_modify(|mut is_open| is_open.toggle());
-    }
+pub(super) fn toggle_editor_window(click: On<Pointer<Click>>, mut commands: Commands) {
+    let click = click.event_target();
+    commands
+        .entity(click)
+        .entry::<EditorWindow>()
+        .or_default()
+        .and_modify(|mut is_open| is_open.toggle());
 }
 
 pub(super) fn detect_planet_creation<T>(
@@ -177,14 +177,21 @@ pub(super) fn create_planet_window(
     }
 }
 
+macro_rules! edit_components {
+    ($ui:expr, $entity:expr, $($edited_type:ty),+) => {
+        $(
+            try_edit_type::<$edited_type>($ui, $entity);
+        )+
+    };
+}
+
 pub(super) fn edit_windows(
-    mut commands: Commands,
     mut context: EguiContexts,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut window_object_query: Query<(
         Entity,
-        &mut OpenWindow,
+        &mut EditorWindow,
         Option<&mut MeshMaterial2d<ColorMaterial>>,
         Option<&mut Mesh2d>,
         Option<&mut PhysicsTransform>,
@@ -192,6 +199,7 @@ pub(super) fn edit_windows(
         Option<&mut PhysicsMaterial>,
     )>,
     window_query: Query<&Window>,
+    mut commands: Commands,
 ) {
     let cursor_pos = window_query
         .single()
@@ -253,10 +261,20 @@ pub(super) fn edit_windows(
     }
 }
 
+fn try_edit_type<EditedType>(ui: &mut Ui, entity: &mut EntityMut)
+where
+    EditedType: EditableComponent,
+    EditedType: Component<Mutability = Mutable>,
+{
+    if let Some(mut to_be_edited) = entity.get_mut::<EditedType>() {
+        to_be_edited.edit_ui(ui)
+    }
+}
+
 fn material_color_editor_row(ui: &mut Ui, material: &mut ColorMaterial) {
     let mut color = material.color.to_linear().to_f32_array();
 
-    ui.label("Planet Color");
+    ui.label("Color");
     ui.color_edit_button_rgba_premultiplied(&mut color);
     ui.end_row();
 
@@ -281,7 +299,7 @@ fn mass_editor(ui: &mut Ui, mass: &mut PhysicsMaterial) {
     ui.end_row();
 }
 
-fn vec2_editor(ui: &mut Ui, vec2: &mut Vec2) {
+pub fn vec2_editor(ui: &mut Ui, vec2: &mut Vec2) {
     ui.horizontal(|ui| {
         ui.add(DragValue::new(&mut vec2.x).prefix("x: "));
         ui.add(DragValue::new(&mut vec2.y).prefix("y: "));

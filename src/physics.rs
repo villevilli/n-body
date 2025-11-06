@@ -1,5 +1,9 @@
 use bevy::math::bounding::BoundingCircle;
 use bevy::{color::palettes::css::LIGHT_BLUE, prelude::*};
+use bevy_egui::egui::DragValue;
+
+use crate::edit_tools::EditableComponent;
+use crate::edit_tools::window::vec2_editor;
 
 const GRAVITATIONAL_CONSTANT: f32 = 6740.0;
 
@@ -31,9 +35,25 @@ impl PhysicsTransform {
     }
 }
 
+impl EditableComponent for PhysicsTransform {
+    fn edit_ui(&mut self, ui: &mut bevy_egui::egui::Ui) {
+        ui.label("Position: ");
+        vec2_editor(ui, &mut self.location);
+        ui.end_row();
+    }
+}
+
 #[derive(Component, Clone, Copy)]
 pub struct PhysicsMaterial {
     pub mass: f32,
+}
+
+impl EditableComponent for PhysicsMaterial {
+    fn edit_ui(&mut self, ui: &mut bevy_egui::egui::Ui) {
+        ui.label("mass: ");
+        ui.add(DragValue::new(&mut self.mass));
+        ui.end_row();
+    }
 }
 
 #[derive(Component, Clone, Copy, Default)]
@@ -60,6 +80,14 @@ impl PhysicsVelocity {
 
     fn apply_acceleration(&mut self, delta: f32) {
         self.velocity += self.acceleration * delta
+    }
+}
+
+impl EditableComponent for PhysicsVelocity {
+    fn edit_ui(&mut self, ui: &mut bevy_egui::egui::Ui) {
+        ui.label("Velocity: ");
+        vec2_editor(ui, &mut self.velocity);
+        ui.end_row();
     }
 }
 
