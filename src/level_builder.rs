@@ -1,4 +1,5 @@
 use crate::{
+    edit_tools::window::EditorWindow,
     graphics::trails::Trail,
     physics::{Collider, PhysicsMaterial, PhysicsTransform, PhysicsVelocity},
 };
@@ -55,6 +56,7 @@ impl SomePlanet {
                         circle: Circle::new(style.radius),
                     }),
                     Trail::default(),
+                    EditorWindow::default(),
                 ));
             }
             SomePlanet::StaticPlanet(static_planet) => {
@@ -68,6 +70,7 @@ impl SomePlanet {
                         center: Vec2::ZERO,
                         circle: Circle::new(style.radius),
                     }),
+                    EditorWindow::default(),
                 ));
             }
         }

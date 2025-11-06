@@ -11,7 +11,7 @@ use bevy::{
 };
 use bevy_egui::{EguiPrimaryContextPass, egui::Ui};
 use window::{
-    CreateNewPlanet, create_planet_window, detect_planet_creation, edit_windows,
+    CreateNewPlanet, create_planet_window, detect_planet_creation, draw_edit_windows,
     toggle_editor_window,
 };
 
@@ -41,7 +41,10 @@ where
             Update,
             (picking_backend_physics::<T>, detect_planet_creation::<T>),
         );
-        app.add_systems(EguiPrimaryContextPass, (edit_windows, create_planet_window));
+        app.add_systems(
+            EguiPrimaryContextPass,
+            (draw_edit_windows, create_planet_window),
+        );
         app.add_observer(toggle_editor_window);
     }
 }

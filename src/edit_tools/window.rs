@@ -14,10 +14,16 @@ use crate::{
 #[derive(Message)]
 pub(super) struct CreateNewPlanet(Vec2);
 
-#[derive(Component, Default)]
+#[derive(Component)]
 pub struct EditorWindow {
     is_open: bool,
     just_changed: bool,
+}
+
+impl Default for EditorWindow {
+    fn default() -> Self {
+        Self::new(false)
+    }
 }
 
 impl EditorWindow {
@@ -45,10 +51,10 @@ impl EditorWindow {
 
 pub(super) fn toggle_editor_window(click: On<Pointer<Click>>, mut commands: Commands) {
     let click = click.event_target();
+
     commands
         .entity(click)
         .entry::<EditorWindow>()
-        .or_default()
         .and_modify(|mut is_open| is_open.toggle());
 }
 
@@ -95,10 +101,13 @@ pub(super) fn create_planet_window(
     mut meshes: ResMut<Assets<Mesh>>,
     window_query: Query<&Window>,
 ) {
-    let cursor_pos: Vec2 = window_query
+    let Ok(cursor_pos) = window_query
         .single()
         .map(|t| t.cursor_position().unwrap_or_default())
-        .expect("One window should exist");
+    else {
+        warn!("One window should exist");
+        return;
+    };
 
     let mut window = egui::Window::new("Planet Creator");
 
@@ -185,7 +194,7 @@ macro_rules! edit_components {
     };
 }
 
-pub(super) fn edit_windows(
+pub(super) fn draw_edit_windows(
     mut context: EguiContexts,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -201,10 +210,10 @@ pub(super) fn edit_windows(
     window_query: Query<&Window>,
     mut commands: Commands,
 ) {
-    let cursor_pos = window_query
-        .single()
-        .expect("One window should exist")
-        .cursor_position();
+    let Ok(cursor_pos) = window_query.single().map(|w| w.cursor_position()) else {
+        warn!("Could not find a window to draw editor in");
+        return;
+    };
 
     for (
         entity,

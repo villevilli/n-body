@@ -7,7 +7,7 @@ pub mod physics;
 
 use bevy::prelude::*;
 
-pub fn print_state_on_change<S>(mut state_change_ev: EventReader<StateTransitionEvent<S>>)
+pub fn print_state_on_change<S>(mut state_change_ev: MessageReader<StateTransitionEvent<S>>)
 where
     S: States,
 {

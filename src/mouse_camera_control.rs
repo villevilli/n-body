@@ -38,7 +38,7 @@ where
     S: States,
 {
     fn build(&self, app: &mut App) {
-        app.add_event::<CameraSettingsChange>();
+        app.add_message::<CameraSettingsChange>();
         app.add_systems(Startup, setup);
         app.add_systems(
             Update,
@@ -66,7 +66,7 @@ fn initial_set_camera_position(
 
 fn set_camera_position(
     mut camera_query: Query<(&mut Projection, &mut Transform), With<MainCameraMarker>>,
-    mut ev_set_camera_pos: EventReader<CameraSettingsChange>,
+    mut ev_set_camera_pos: MessageReader<CameraSettingsChange>,
 ) {
     for set_camera_pos in ev_set_camera_pos.read() {
         let (mut camera_projection, mut transform) =

@@ -41,7 +41,7 @@ pub fn update_trail(
 ) {
     trail_update_config.0.tick(time.delta());
 
-    if !trail_update_config.0.finished() {
+    if !trail_update_config.0.is_finished() {
         return;
     }
 
