@@ -14,7 +14,7 @@ impl Trail {
     fn draw_gizmo(&self, gizmos: &mut Gizmos) {
         let domain = Interval::new(0.0, TRAIL_LENGTH as f32).expect("Interval is invalid");
 
-        let Ok(curve) = SampleAutoCurve::new(domain, self.0.clone().into_iter()) else {
+        let Ok(curve) = SampleAutoCurve::new(domain, self.0.clone()) else {
             return;
         };
 

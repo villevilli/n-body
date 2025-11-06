@@ -1,12 +1,12 @@
 use bevy::prelude::*;
 use bevy_egui::{
-    egui::{self, DragValue, Grid, Ui},
     EguiContexts,
+    egui::{self, DragValue, Grid, Ui},
 };
 use rand::random;
 
 use crate::{
-    level_builder::{calculate_radius, PlanetBuilder},
+    level_builder::{PlanetBuilder, calculate_radius},
     physics::{PhysicsMaterial, PhysicsTransform, PhysicsVelocity},
 };
 
@@ -64,8 +64,13 @@ pub(super) fn detect_planet_creation<T>(
         return;
     }
 
-    let (camera, camera_transform) = camera_query.single();
-    let cursor_pos = window_query.single().cursor_position().unwrap_or_default();
+    let Ok((camera, camera_transform)) = camera_query.single() else {
+        panic!("No camera for determining user planet creation")
+    };
+    let cursor_pos = window_query
+        .single()
+        .map(|t| t.cursor_position().unwrap_or_default())
+        .expect("One window should exist");
 
     let planet_pos = match camera.viewport_to_world_2d(camera_transform, cursor_pos) {
         Ok(x) => x,
@@ -75,9 +80,10 @@ pub(super) fn detect_planet_creation<T>(
         }
     };
 
-    create_planet_ew.send(CreateNewPlanet(planet_pos));
+    create_planet_ew.write(CreateNewPlanet(planet_pos));
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(super) fn create_planet_window(
     mut gizmos: Gizmos,
     mut create_planet_event: EventReader<CreateNewPlanet>,
@@ -89,7 +95,11 @@ pub(super) fn create_planet_window(
     mut meshes: ResMut<Assets<Mesh>>,
     window_query: Query<&Window>,
 ) {
-    let cursor_pos = window_query.single().cursor_position();
+    let cursor_pos: Vec2 = window_query
+        .single()
+        .map(|t| t.cursor_position().unwrap_or_default())
+        .expect("One window should exist");
+
     let mut window = egui::Window::new("Planet Creator");
 
     if let Some(planet_creation_event) = create_planet_event.read().next() {
@@ -98,7 +108,7 @@ pub(super) fn create_planet_window(
         planet_ref.position = planet_creation_event.0;
         planet_ref.color = Color::hsv(random::<f32>() * 360.0, 1.0, 1.0);
         *is_open = true;
-        window = window.current_pos(cursor_pos.unwrap_or_default().to_array());
+        window = window.current_pos(cursor_pos.to_array());
     }
 
     let Some(current_planet) = &mut *current_planet else {
@@ -120,44 +130,47 @@ pub(super) fn create_planet_window(
         .resizable([false; 2])
         .collapsible(false)
         .open(&mut is_open)
-        .show(context.ctx_mut(), |ui| {
-            Grid::new("lol").show(ui, |ui| {
-                ui.label("Planet Color");
+        .show(
+            context.ctx_mut().expect("Egui context should exist"),
+            |ui| {
+                Grid::new("lol").show(ui, |ui| {
+                    ui.label("Planet Color");
 
-                let mut color = current_planet.color.to_linear().to_f32_array();
+                    let mut color = current_planet.color.to_linear().to_f32_array();
 
-                ui.color_edit_button_rgba_premultiplied(&mut color);
+                    ui.color_edit_button_rgba_premultiplied(&mut color);
 
-                current_planet.color = Color::LinearRgba(LinearRgba::from_f32_array(color));
-                ui.end_row();
+                    current_planet.color = Color::LinearRgba(LinearRgba::from_f32_array(color));
+                    ui.end_row();
 
-                //Position
-                ui.label("Position");
-                vec2_editor(ui, &mut current_planet.position);
-                ui.end_row();
+                    //Position
+                    ui.label("Position");
+                    vec2_editor(ui, &mut current_planet.position);
+                    ui.end_row();
 
-                //Velocity
-                ui.label("Velocity");
-                vec2_editor(ui, current_planet.velocity.get_or_insert_default());
-                ui.end_row();
+                    //Velocity
+                    ui.label("Velocity");
+                    vec2_editor(ui, current_planet.velocity.get_or_insert_default());
+                    ui.end_row();
 
-                //Mass editor
-                ui.label("Mass");
-                ui.add(DragValue::new(&mut current_planet.mass));
-                ui.end_row();
+                    //Mass editor
+                    ui.label("Mass");
+                    ui.add(DragValue::new(&mut current_planet.mass));
+                    ui.end_row();
 
-                //Create Button
-                if ui.button("Create Planet").clicked() {
-                    current_planet.clone().build().build(
-                        &mut commands,
-                        &mut meshes,
-                        &mut materials,
-                    );
+                    //Create Button
+                    if ui.button("Create Planet").clicked() {
+                        current_planet.clone().build().build(
+                            &mut commands,
+                            &mut meshes,
+                            &mut materials,
+                        );
 
-                    should_close = true;
-                }
-            });
-        });
+                        should_close = true;
+                    }
+                });
+            },
+        );
 
     if should_close {
         *is_open = false;
@@ -180,7 +193,10 @@ pub(super) fn edit_windows(
     )>,
     window_query: Query<&Window>,
 ) {
-    let cursor_pos = window_query.single().cursor_position();
+    let cursor_pos = window_query
+        .single()
+        .expect("One window should exist")
+        .cursor_position();
 
     for (
         entity,
@@ -204,7 +220,7 @@ pub(super) fn edit_windows(
         window
             .resizable([false; 2])
             .open(&mut open_window.is_open)
-            .show(context.ctx_mut(), |ui| {
+            .show(context.ctx_mut().unwrap(), |ui| {
                 egui::Grid::new("lol").show(ui, |ui| {
                     if let Some(Some(material)) =
                         color_material.map(|x| materials.get_mut(x.as_ref()))

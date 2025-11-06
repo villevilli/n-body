@@ -9,8 +9,9 @@ use bevy::{
     },
     prelude::*,
 };
+use bevy_egui::EguiPrimaryContextPass;
 use window::{
-    create_planet_window, detect_clicks, detect_planet_creation, edit_windows, CreateNewPlanet,
+    CreateNewPlanet, create_planet_window, detect_clicks, detect_planet_creation, edit_windows,
 };
 
 use crate::physics::Collider;
@@ -41,10 +42,9 @@ where
                 picking_backend_physics::<T>,
                 detect_planet_creation::<T>,
                 detect_clicks,
-                edit_windows,
-                create_planet_window,
             ),
         );
+        app.add_systems(EguiPrimaryContextPass, (edit_windows, create_planet_window));
     }
 }
 
@@ -59,7 +59,9 @@ pub fn picking_backend_physics<T>(
 ) where
     T: Component,
 {
-    let (camera_entity, camera, camera_global_transform) = camera_query.single();
+    let Ok((camera_entity, camera, camera_global_transform)) = camera_query.single() else {
+        panic!("Missing camera to initialize picking backend")
+    };
 
     for (pointer_location, pointer_id) in pointer_locations.iter() {
         if let Some(pointer_location) = pointer_location.location() {
@@ -86,7 +88,7 @@ pub fn picking_backend_physics<T>(
                 }
             }
             if !event.picks.is_empty() {
-                ew_pointerhits.send(event);
+                ew_pointerhits.write(event);
             }
         }
     }

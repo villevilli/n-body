@@ -5,8 +5,8 @@ use bevy::{math::vec2, prelude::*};
 use bevy_egui::EguiPlugin;
 use n_body_platformer::commands::command_parser::DevCommandList;
 use n_body_platformer::commands::{CmdlineState, DevCommandlinePlugin};
-use n_body_platformer::edit_tools::{picking_backend_physics, EditingToolsPlugin};
-use n_body_platformer::graphics::trails::{draw_trail, update_trail, TrailUpdateConfig};
+use n_body_platformer::edit_tools::{EditingToolsPlugin, picking_backend_physics};
+use n_body_platformer::graphics::trails::{TrailUpdateConfig, draw_trail, update_trail};
 use n_body_platformer::level_builder::LevelBuilderPlugin;
 use n_body_platformer::mouse_camera_control::{CameraSettings, MainCameraMarker};
 use n_body_platformer::{
@@ -65,7 +65,7 @@ fn main() {
                     ..Default::default()
                 },
             },
-            EguiPlugin,
+            EguiPlugin::default(),
             PhysicsPlugin {
                 running_state: SimulationState::Running,
             },

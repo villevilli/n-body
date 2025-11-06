@@ -49,7 +49,7 @@ fn main() {
             EditingToolsPlugin::<MainCameraMarker> {
                 main_camera_type: std::marker::PhantomData,
             },
-            EguiPlugin,
+            EguiPlugin::default(),
         ))
         .add_systems(Update, keyboard_state_changer)
         .insert_state(AlwaysOn)

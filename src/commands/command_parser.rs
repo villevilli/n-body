@@ -21,14 +21,19 @@ impl DevCommandList {
     }
 
     /// Default commands include the following commands:
-    /// - ```setclockspeed [f32]``` sets a multiplier on speed that
-    /// the bevy clock advances by
+    /// - ```setclockspeed [f32]``` sets a multiplier on speed that the bevy clock advances by
     pub fn add_default_commands(self, world: &mut World) -> Self {
         self.add_command(DevCommand::new(
             "setclockspeed",
             IntoSystem::into_system(set_speed_multiplier),
             world,
         ))
+    }
+}
+
+impl Default for DevCommandList {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -74,7 +79,7 @@ where
     fn run(&self, commands: &mut Commands, args: &str) -> Option<String> {
         match args.parse() {
             Ok(args) => {
-                commands.run_system_with_input(self.system_id, args);
+                commands.run_system_with(self.system_id, args);
                 None
             }
             Err(e) => {

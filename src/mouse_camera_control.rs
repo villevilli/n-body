@@ -61,15 +61,20 @@ fn initial_set_camera_position(
     camera_settings: In<CameraSettings>,
     mut ew_set_camera_pos: EventWriter<CameraSettingsChange>,
 ) {
-    ew_set_camera_pos.send(CameraSettingsChange(camera_settings.0));
+    ew_set_camera_pos.write(CameraSettingsChange(camera_settings.0));
 }
 
 fn set_camera_position(
-    mut camera_query: Query<(&mut OrthographicProjection, &mut Transform), With<MainCameraMarker>>,
+    mut camera_query: Query<(&mut Projection, &mut Transform), With<MainCameraMarker>>,
     mut ev_set_camera_pos: EventReader<CameraSettingsChange>,
 ) {
     for set_camera_pos in ev_set_camera_pos.read() {
-        let (mut camera_projection, mut transform) = camera_query.single_mut();
+        let (mut camera_projection, mut transform) =
+            camera_query.single_mut().expect("Missing main camera");
+
+        let Projection::Orthographic(ref mut camera_projection) = *camera_projection else {
+            panic!("Non ortographic projection not supported")
+        };
 
         transform.translation = set_camera_pos.0.pos.extend(transform.translation.z);
         camera_projection.scale = set_camera_pos.0.zoom
@@ -81,13 +86,18 @@ fn camera_mouse_control(
     mouse_motion: Res<AccumulatedMouseMotion>,
     mouse_scroll: Res<AccumulatedMouseScroll>,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    mut camera_query: Query<(&mut OrthographicProjection, &mut Transform), With<MainCameraMarker>>,
+    mut camera_query: Query<(&mut Projection, &mut Transform), With<MainCameraMarker>>,
 ) {
     //It's okay to panic if there are two main cameras
-    let (mut projection, mut transform) = camera_query.single_mut();
+    let (mut projection, mut transform) =
+        camera_query.single_mut().expect("Multiple primary cameras");
+
+    let Projection::Orthographic(ref mut projection) = *projection else {
+        panic!("Non ortographic projection not supported")
+    };
 
     //It's also okay to panic with two primary windows
-    let window = window_query.single();
+    let window = window_query.single().expect("Multiple primary windows");
 
     if mouse_buttons.pressed(MouseButton::Right) {
         let mut translation = mouse_motion.delta.extend(0.0);

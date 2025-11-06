@@ -3,8 +3,8 @@ pub mod command_parser;
 use bevy::{
     color::palettes::css::WHITE,
     input::{
-        keyboard::{Key, KeyboardInput},
         ButtonState,
+        keyboard::{Key, KeyboardInput},
     },
     prelude::*,
 };
@@ -95,8 +95,8 @@ fn exit_cmdline(
     cmdline_entity_query: Query<Entity, With<DevCommandlineMarker>>,
 ) {
     commands
-        .entity(cmdline_entity_query.single())
-        .despawn_recursive();
+        .entity(cmdline_entity_query.single().unwrap())
+        .despawn();
 }
 
 fn update_cmdline(
@@ -105,7 +105,7 @@ fn update_cmdline(
     mut commands: Commands,
     dev_comands: Res<DevCommandList>,
 ) {
-    let mut text = cmdline_query.single_mut();
+    let mut text = cmdline_query.single_mut().unwrap();
 
     for event in ev_kb_input.read() {
         if event.state == ButtonState::Released {
@@ -135,10 +135,10 @@ fn update_cmdline(
                 text.0.clear();
             }
             Key::Tab => {
-                if let Some(subtrie) = dev_comands.0.get_raw_descendant(&text.0) {
-                    if let Some(key) = subtrie.key() {
-                        text.0 = key.to_string();
-                    }
+                if let Some(subtrie) = dev_comands.0.get_raw_descendant(&text.0)
+                    && let Some(key) = subtrie.key()
+                {
+                    text.0 = key.to_string();
                 }
             }
             Key::Backspace => {
@@ -147,7 +147,7 @@ fn update_cmdline(
             Key::Space => {
                 text.0.push(' ');
             }
-            Key::Character(c) => text.0.push_str(&c),
+            Key::Character(c) => text.0.push_str(c),
             _ => {}
         }
     }
